@@ -27,7 +27,7 @@ pylab.rcParams.update(font)
 
 class TrainerCoulomb(object):
     """docstring for TrainerCoulomb"""
-    def __init__(self, model, train_loader, val_loader, test_loader, epoch, labels, out_dir, lr, lambdas):
+    def __init__(self, model, train_loader, val_loader, test_loader, epoch, labels, out_dir, lr, lambdas, gpu):
         super(TrainerCoulomb, self).__init__()
 
         self.model = model # .cuda()
@@ -38,6 +38,7 @@ class TrainerCoulomb(object):
         self.labels_list = labels
         self.out_dir = out_dir
         self.lambdas = lambdas
+        self.gpu = gpu
         # self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr = lr)
         lpe_params = list(map(id, self.model.encoder.embs_lpe.parameters()))
         base_params = filter(lambda p: id(p) not in lpe_params, self.model.parameters())
@@ -56,11 +57,23 @@ class TrainerCoulomb(object):
     def _to_var(self, x, t = "float"):
         x = np.array(x)
         if t == "int":
-            return torch.LongTensor(x) #.cuda()
+            if self.gpu>=0:
+                return torch.LongTensor(x).cuda()
+            else:
+                return torch.LongTensor(x)
+
         elif t == "bool":
-            return torch.BoolTensor(x) #.cuda()
+            if self.gpu>=0:
+                return torch.BoolTensor(x).cuda()
+            else:
+                return torch.BoolTensor(x)
+
         else:
-            return torch.FloatTensor(x) #.cuda()
+            if self.gpu>=0:
+                return torch.FloatTensor(x).cuda()
+            else:
+                return torch.FloatTensor(x)
+
 
     def _to_var_dict(self, x):
         new_dict = {}

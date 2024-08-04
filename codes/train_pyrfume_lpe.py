@@ -46,7 +46,10 @@ args = parser.parse_args()
 if args.device <0:
     print('cpu?')
 else:
+    
     torch.cuda.set_device(args.device)
+
+
 result_path = os.path.join(args.out_dir, "results_min_loss.csv")
 args.hid_dims = [args.hid_dim] * args.hid_layer
 args.fc_dims = [sum(args.hid_dims), 32]
@@ -78,7 +81,7 @@ if args.pretrained_path != "":
     model = load_pretrained_infograph(model, args.pretrained_path)
 
 if args.gnn_matrix == "coulomb":
-    trainer = TrainerCoulomb(model, train_loader, val_loader, test_loader, args.epoch, train_data.labels, args.out_dir, args.lr, args.lambdas)
+    trainer = TrainerCoulomb(model, train_loader, val_loader, test_loader, args.epoch, train_data.labels, args.out_dir, args.lr, args.lambdas, args.device)
 
 trainer.fit_classification()
 
