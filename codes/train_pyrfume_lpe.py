@@ -36,14 +36,17 @@ parser.add_argument("--LPE_dim", default = 32, type = int)
 parser.add_argument("--LPE_n_heads", default = 4, type = int)
 parser.add_argument("--LPE_layer", default = 5, type = int)
 parser.add_argument("--lambdas", default = [0.0, 0.25, 0.75], type = float, nargs = "+") ## raw, lpe, combined
-parser.add_argument("--device", default = 2, type = int)
+parser.add_argument("--device", default = -1, type = int)
 parser.add_argument("--model", default = "GNN", type = str)
 parser.add_argument("--lambda_random", default = 0.001, type = float)
 parser.add_argument("--which_emb", default = "afterNN", type = str)
 parser.add_argument("--pretrained_path", default = "")
 
 args = parser.parse_args()
-torch.cuda.set_device(args.device)
+if args.device <0:
+    print('cpu?')
+else:
+    torch.cuda.set_device(args.device)
 result_path = os.path.join(args.out_dir, "results_min_loss.csv")
 args.hid_dims = [args.hid_dim] * args.hid_layer
 args.fc_dims = [sum(args.hid_dims), 32]

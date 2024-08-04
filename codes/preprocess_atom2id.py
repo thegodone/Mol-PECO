@@ -295,7 +295,7 @@ class PyrfumeDumper(DataDumperLoader):
         print("smiles: {}".format(len(self.smiles_list)))
 
 if __name__ == '__main__':
-    data_dir = "../data/CM_frobenius/"
+    data_dir = "../data/"
     atom2id_path = "../data/atom2id.txt"
     dumper = PyrfumeDumper(data_dir, step_binary = 20, cou_norm = "minmax", max_atoms = 62, max_size = 62, atom2id_path = atom2id_path, add_Hs = True, freq = 20)
     dumper.dump()

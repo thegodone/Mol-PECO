@@ -6,20 +6,56 @@
 # @Version : $Id$
 
 import os, torch
-import deepchem as dc
 import numpy as np
 import torch.nn.functional as F
-import rdkit.Chem as Chem
+import rdkit
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit.Chem.rdMolDescriptors import CalcCoulombMat
 from scipy import sparse as sp
+from typing import Any, Iterator, List, Optional, Tuple, Union, cast, IO
+
+
+
+# from deepchem data_utils
+def pad_array(x: np.ndarray,
+              shape: Union[Tuple, int],
+              fill: float = 0.0,
+              both: bool = False) -> np.ndarray:
+
+    x = np.asarray(x)
+    if not isinstance(shape, tuple):
+        shape = tuple(shape for _ in range(x.ndim))
+    pad = []
+    for i in range(x.ndim):
+        diff = shape[i] - x.shape[i]
+        assert diff >= 0
+        if both:
+            a, b = divmod(diff, 2)
+            b += a
+            pad.append((a, b))
+        else:
+            pad.append((0, diff))
+    pad = tuple(pad)  # type: ignore
+    x = np.pad(x, pad, mode='constant', constant_values=fill)
+    return x
+
 
 def cal_coulomb_matrix(mol, max_atoms = 28):
     try:
-        featurizer = dc.feat.CoulombMatrix(max_atoms = max_atoms)
-        cou_matrix = featurizer.coulomb_matrix(mol)
+        #featurizer = dc.feat.CoulombMatrix(max_atoms = max_atoms)
+        #cou_matrix = featurizer.coulomb_matrix(mol)
+        AllChem.EmbedMolecule(mol ,AllChem.ETKDGv3())
+        cou_matrix = CalcCoulombMat(mol)
+        # convert into an array of array (matrix)
+        cou_matrix = np.array(cou_matrix)
+        # padding step
+        cou_matrix = pad_array(cou_matrix, max_atoms)
+
         if np.isinf(cou_matrix).sum()!=0:
             print(Chem.MolToSmiles(mol), "invalid coulomb matrix")
             return None, False
-        return cou_matrix[0], True
+        return cou_matrix, True
     except Exception as e:
         return None, False
 
@@ -55,22 +91,7 @@ if __name__ == '__main__':
     print(mol.GetNumAtoms())
     mol = Chem.AddHs(mol)
     print(mol.GetNumAtoms())
-    cou_matrix = cal_coulomb_matrix(mol, max_atoms = mol.GetNumAtoms())
-    print(cou_matrix.shape)
-    # print(cou_matrix[0])
+    cou_matrix = cal_coulomb_matrix(mol)
+    print(cou_matrix)
+    print(cou_matrix[0].shape)
 
-    # N = mol.GetNumAtoms()
-    # adjs = np.zeros((N, N), dtype = np.float32)
-    # bond2channel = {
-    #         Chem.BondType.SINGLE: 0,
-    #         Chem.BondType.DOUBLE: 1,
-    #         Chem.BondType.TRIPLE: 2,
-    #         Chem.BondType.AROMATIC: 3
-    # }
-    # for bond in mol.GetBonds():
-    #     i = bond.GetBeginAtomIdx()
-    #     j = bond.GetEndAtomIdx()
-    #     adjs[i, j] = 1.
-    #     adjs[j, i] = 1.
-    # print(adjs.shape)
-    # print(adjs)

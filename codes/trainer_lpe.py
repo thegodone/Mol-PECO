@@ -29,7 +29,8 @@ class TrainerCoulomb(object):
     """docstring for TrainerCoulomb"""
     def __init__(self, model, train_loader, val_loader, test_loader, epoch, labels, out_dir, lr, lambdas):
         super(TrainerCoulomb, self).__init__()
-        self.model = model.cuda()
+
+        self.model = model # .cuda()
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.test_loader = test_loader
@@ -55,11 +56,11 @@ class TrainerCoulomb(object):
     def _to_var(self, x, t = "float"):
         x = np.array(x)
         if t == "int":
-            return torch.LongTensor(x).cuda()
+            return torch.LongTensor(x) #.cuda()
         elif t == "bool":
-            return torch.BoolTensor(x).cuda()
+            return torch.BoolTensor(x) #.cuda()
         else:
-            return torch.FloatTensor(x).cuda()
+            return torch.FloatTensor(x) #.cuda()
 
     def _to_var_dict(self, x):
         new_dict = {}

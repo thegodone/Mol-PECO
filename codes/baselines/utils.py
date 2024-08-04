@@ -313,5 +313,5 @@ class SKClassifier(object):
 
         
 if __name__ == '__main__':
-    dp = DataPreprocess("../../pyrfume_models3_sois/dumped30_coulomb_frobenius/", "mordreds")
+    dp = DataPreprocess("../../data/", "mordreds")
     dp.process()
